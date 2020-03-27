@@ -8,14 +8,14 @@ PeBit = 0;
 PED = 0;
 
 for i = 1 : N
-    %     Источник
-    indexCode = randi([1 K],1,1);%генерация индекса код. слова
+
+    indexCode = randi([1 K],1,1); % РІС‹Р±РёСЂР°РµРј РєР°РєРѕРµ РєРѕРґРѕРІРѕРµ СЃР»РѕРІРѕ РїРµСЂРµРґР°РµРј
+   
     %     CRC-r
-    mX = codes(indexCode, :); % берём код. слово по индексу из код. книжки
+    mX = codes(indexCode, :); % РєРѕРґРѕРІРѕРµ СЃР»РѕРІРѕ
     %     BPSK
-    mS = mX.*-2 + 1;
-    
-    %     АБГШ
+    mS = mX.*-2 + 1; 
+   
     mR = mS + sigma * randn(1, n);
     
     %     BPSK ^-1
@@ -25,7 +25,7 @@ for i = 1 : N
     
     PED = PED + (flag_sum > 0 & sum(modGx(mX_, gX)) == 0); 
     
-    PeBit = PeBit + flag_sum; % количество ошибок в код слове
+    PeBit = PeBit + flag_sum; 
 end
 
 PeBit = PeBit / N / n;

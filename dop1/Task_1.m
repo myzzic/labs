@@ -28,17 +28,15 @@ parfor i = 1 : length(SNRdB)
     PEDs(1, i) = PED;
 end
 
-% ---- Âåðîÿòíîñòè îøèáêè íà áèò äëÿ BPSK.  ----
+
 SNRtheor = 10.^(SNRdB/10);
 PeBitstheor = qfunc(sqrt(2*SNRtheor));
 
 
-% ---- Âåðîÿòíîñòü îøèáêè äåêîäèðîâàíèÿ CRC. ----
-% Âåðõíÿÿ ãðàíèöà (àñèìïòîòè÷åñêàÿ):
 r = length(gX) - 1;
 PEDs_asimp = (ones(1, length(SNRdB)) ./ 2).^ r;
 
-%Òî÷íàÿ âåðîÿòíîñòü îøèáêè äåêîäèðîâàíèÿ CRC:
+
 A = A_func(codes);
 d_min = min(sum(codes(2:end, :),2));
 n = r + k;
@@ -51,7 +49,7 @@ for i = 1 : length(SNRdB)
     end
 end
 
-%Áîëåå òî÷íàÿ âåðõíÿÿ ãðàíèöà îøèáêè äåêîäèðîâàíèÿ CRC:
+
 PEDs_asimp_2 = (2^k - 1).*PeBitstheor.^d_min;
 
 figure();

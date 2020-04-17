@@ -1,27 +1,27 @@
 clc; clear; close all
 
 g_x = [1 0 1 0 0 1 1 0 1 0 1 1 1 1 0 0 1];
-k = 8;                  % Длина сообщения
-r = length(g_x) - 1;    % Длина CRC части
-num_messages = 2^k;     % Количество возможных сообщений
-[H, G] = hammgen(4);    % Проверочная и порождающая матрицы
+k = 8;                  % РґР»РёРЅР° СЃРѕРѕР±С‰РµРЅРёСЏ
+r = length(g_x) - 1;    % СЃС‚РµРїРµРЅСЊ g(x)
+num_messages = 2^k;     % РєРѕР»РІРѕ СЃРѕРѕР±С‰РµРЅРёР№
+[H, G] = hammgen(4);    % 
 
-messages = de2bi((0:num_messages-1)');     % Все возможные сообщения
-codewords = zeros(num_messages, k+r);      % Все кодовые слова с CRC
-mes_3_11 = zeros(num_messages, 3, 11);     % Все кодовые слова, разделенные 
-                                           % на три части по 8 бит + 3 нуля
-ham_3_15 = zeros(num_messages, 3, 15);     % Закодированные по Хэммингу
-channel_3_12 = zeros(num_messages, 3, 12); % Замодулированные BPSK (-1, 1)
-                                           % без добавленных 3х нулей,
-% Генерация                                  которые отправляются в канал
+messages = de2bi((0:num_messages-1)');     
+codewords = zeros(num_messages, k+r);      % РјР°СЃСЃРёРІ РєРѕРґРѕРІС‹С… СЃР»РѕРІ
+mes_3_11 = zeros(num_messages, 3, 11);     % С…3 РїРѕ 11
+                                           
+ham_3_15 = zeros(num_messages, 3, 15);     
+channel_3_12 = zeros(num_messages, 3, 12); %  BPSK (-1, 1)
+                                          
+                        
 for j=1:num_messages
-    [~, c] = gfdeconv([zeros(1, r), messages(j,:)], g_x);   % CRC часть
-    codewords(j,:) = xor([zeros(1, r), messages(j,:)], ...  % Сообщение +
-                         [c, zeros(1, k+r - length(c))]);   % + CRC
-    mes_3_11(j, :, :) = [reshape(codewords(j, :), 8, 3)' ...% На 3 части +
-                         [0 0 0; 0 0 0; 0 0 0]];            % + нули
+    [~, c] = gfdeconv([zeros(1, r), messages(j,:)], g_x);   % CRC 
+    codewords(j,:) = xor([zeros(1, r), messages(j,:)], ... 
+                         [c, zeros(1, k+r - length(c))]);   
+    mes_3_11(j, :, :) = [reshape(codewords(j, :), 8, 3)' ...
+                         [0 0 0; 0 0 0; 0 0 0]];            
     for i=1:3
-        ham_3_15(j, i, :) = mod(reshape(mes_3_11(j, i, :), 1, 11) * G, 2);
+        ham_3_15(j, i, :) = mod(reshape(mes_3_11(j, i, :), 1, 11) * G, 2); % РєРѕРґРёСЂРѕРІР°РЅРёРµ РїРѕ С…СЌРјРјРёРЅРіСѓ
         channel_3_12(j, i, :) = ham_3_15(j, i, 1:end-3)*(-2) + 1; 
     end
 end
@@ -33,7 +33,7 @@ for j=1:2^8
     h(j, :) = temp(1, 1:end-3) .*(-2) + 1;
 end
 
-% Теоретический расчет
+% РўРµРѕСЂРµС‚РёС‡РµСЃРєРёРµ Р·РЅР°С‡РµРЅРёСЏ
 SNRdB = -10:0;
 SNR = 10.^(SNRdB./10);
 Pe_bit_theor = qfunc(sqrt(2.*SNR));         
@@ -50,32 +50,32 @@ for i=1:length(SNR)
     Ped_theor(i) = Pe_theoretical;
 end
 
-% Моделирование
-Pe_bit = zeros(1,length(SNRdB));  % Вероятность ошибки на бит
+ 
+Pe_bit = zeros(1,length(SNRdB));  % РѕС€РёР±РєР° РЅР° Р±РёС‚
 Pe_bit_after_Hamming = zeros(1,length(SNRdB));
 Pe_bit_after_Hamming_soft = zeros(1,length(SNRdB));
-Ped = zeros(1,length(SNRdB));     % Вероятность ошибки декодирования
-Ped_soft = zeros(1,length(SNRdB));% Вероятность ошибки декодирования soft
-T = zeros(1,length(SNRdB));       % Пропускная способность канала
+Ped = zeros(1,length(SNRdB));     % РІРµСЂ РѕС€РёР±РєРё РґРµРєРѕРґРµСЂР°
+Ped_soft = zeros(1,length(SNRdB));
+T = zeros(1,length(SNRdB));       % РїСЂРѕРїСѓСЃРєРЅР°СЏ СЃРїРѕСЃРѕР±РЅРѕСЃС‚СЊ РєР°РЅР°Р»Р°
 for i=1:length(SNR)
     disp(i);
     sigma = sqrt(1/(2*SNR(i)));
-    nTests = 0; nSent = 0;
+    nTests = 0; nSent = 0; %РєРѕР»РІРѕ РїРѕРїС‹С‚РѕРє РїРµСЂРµРґР°С‡Рё %СЃРєРѕР»СЊРєРѕ Р±С‹Р»Рѕ РѕС‚РїСЂР°РІР»РµРЅРѕ
     nErrDecode = 0; nErrDecode_soft = 0;
     nErrBits = 0; nErrBits_H = 0; nErrBits_H_soft = 0;
     messages_to_send = 0;
-    while messages_to_send < 10*(SNR(i)+11)
+    while messages_to_send < 10*(SNR(i)+10)
         messages_to_send = messages_to_send + 1;
         rand_ind = randi(num_messages, 1);
         c = reshape(channel_3_12(rand_ind, :, :), 3, 12);
         while 1
             nTests = nTests + 1;
-            AWGN = c + sigma*randn(3, 12);
+            AWGN = c + sigma*randn(3, 12); %СЃРѕРѕР±С‰РµРЅРёРµ РїР»СЋСЃ С€СѓРј
             
-            [corrected, nErr, v] = correctError(AWGN, H, c);
+            [corrected, nErr, v] = correctError(AWGN, H, c);    %Р¶РµСЃС‚РєРёР№
             nErrBits = nErrBits + nErr;
             nErrBits_H = nErrBits_H + v;
-            [soft_corrected, v_soft] = ...
+            [soft_corrected, v_soft] = ...                      %РјСЏРіРєРёР№
                 correctSoft(AWGN, h, all_codewords, c);
             nErrBits_H_soft = nErrBits_H_soft + v_soft;
             
@@ -103,7 +103,7 @@ for i=1:length(SNR)
     Pe_bit(i) = nErrBits/(nTests*36);
     Pe_bit_after_Hamming(i) = nErrBits_H/(nTests*36);
     Pe_bit_after_Hamming_soft(i) = nErrBits_H_soft/(nTests*36);
-    T(i) = k * nSent / (36 * nTests);
+    T(i) = k * nSent / (36 * nTests); %РїСЂРѕРїСѓСЃРєРЅР°СЏ СЃРїРѕСЃРѕР±РЅРѕСЃС‚СЊ РєР°РЅР°Р»Р°
 end
 
 figure;
@@ -123,19 +123,16 @@ legend('Pe bit', 'Pe bit after Hamming', ...
 xlabel('E/N_0, dB')
 subplot(1, 2, 2);
 plot(SNRdB, T, 'b.-');
-ylabel('T, пропускная способность');
+ylabel('T, ГЇГ°Г®ГЇГіГ±ГЄГ­Г Гї Г±ГЇГ®Г±Г®ГЎГ­Г®Г±ГІГј');
 xlabel('E/N_0, dB')
 
-% Синдромное декодирование
+% 
 function [concatenated, nErrBits, v] = correctError(AWGN, H, c)
 	unBPSK = AWGN < 0;
-    nErrBits = sum(sum(xor(c < 0, unBPSK)));
+    nErrBits = sum(sum(xor(c < 0, unBPSK))); %РєРѕР»РІРѕ РѕС€РёР±РѕС‡РЅС‹С… Р±РёС‚РѕРІ РІ СЃР»РѕРІРµ
     plus_zeros = [unBPSK(:, :) [0 0 0; 0 0 0; 0 0 0]];
     corrected = zeros(3, 12);
-    
-    % Позиции ошибок, полученные перебором синдромов, по порядку,
-    % соответствующему порядку синдромов в десятичном виде (1-15),
-    % (0 - ошибок нет, в массив не входит)
+
             % [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
             %  0,1,0,0,0,0,0,0,0,0,0,0,0,0,0;
             %  0,0,0,0,1,0,0,0,0,0,0,0,0,0,0;
@@ -153,11 +150,10 @@ function [concatenated, nErrBits, v] = correctError(AWGN, H, c)
             %  0,0,0,0,0,0,0,0,0,0,0,0,1,0,0];
 
     for part=1:3
-        corr = plus_zeros(part, :); % Если синдром будет равен 0, 
-                                    % результатом будет исходный вектор
-        S = bi2de(mod(corr*H',2)); % Умножаем на проверочную матрицу
-                                   % в поле по модулю 2, получаем 4-битный  
-                                   % синдром, переводим в число от 0 до 15
+        corr = plus_zeros(part, :); %
+                                    
+        S = bi2de(mod(corr*H',2)); % СЃРёРЅРґСЂРѕРј
+                                  
         switch S
             case 1
                 corr = gfadd(corr,[1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]);
@@ -198,7 +194,7 @@ function [concatenated, nErrBits, v] = correctError(AWGN, H, c)
                     corrected(3, 5:end)];
 end
 
-% Soft-декодер
+% Soft
 function [concatenated, v] = correctSoft(AWGN, h, codes, c)
     min_d = [100 100 100];
     corrected = codes(1, :);

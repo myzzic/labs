@@ -123,7 +123,7 @@ legend('Pe bit', 'Pe bit after Hamming', ...
 xlabel('E/N_0, dB')
 subplot(1, 2, 2);
 plot(SNRdB, T, 'b.-');
-ylabel('T, ïðîïóñêíàÿ ñïîñîáíîñòü');
+ylabel('T, Пропускная способность');
 xlabel('E/N_0, dB')
 
 % 

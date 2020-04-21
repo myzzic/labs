@@ -188,7 +188,7 @@ function [concatenated, nErrBits, v] = correctError(AWGN, H, c)
         end
         corrected(part, :) = corr(1, 1:end-3);
     end
-    v = sum(sum(xor(corrected, c<0)));
+    v = sum(sum(xor(corrected, c<0))); %колво ошибочных бит после жесткого декодирования
     concatenated = [corrected(1, 5:end) ...
                     corrected(2, 5:end) ...
                     corrected(3, 5:end)];
